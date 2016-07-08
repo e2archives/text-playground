@@ -1,0 +1,7 @@
+{
+  "name": "Visualizing Text",
+  "short_name": "Visualizing Text",
+  "description": "App to demonstrate some text analytics",
+  "start_url": "/",
+  "display": "standalone"
+}

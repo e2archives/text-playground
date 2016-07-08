@@ -1,0 +1,22 @@
+{
+  "name": "Visualizing Text",
+  "description": "App to demonstrate some text analytics",
+  "main": "index.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.4.0",
+    "retext": "^3.0.0",
+    "retext-keywords": "^2.0.2",
+    "retext-english": "^1.0.1",
+    "retext-sentiment": "^2.0.0",
+    "paper-elements": "polymerelements/paper-elements#^1.0.7",
+    "app-elements": "polymerelements/app-elements#^0.9.0",
+    "iron-elements": "polymerelements/iron-elements#^1.0.10",
+    "neon-elements": "polymerelements/neon-elements#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+    "web-component-tester": "^4.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+  }
+}

@@ -1,0 +1,156 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/font-roboto/roboto.html">
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/effects/resize-title.html">
+
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+
+<dom-module id="text-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+        font-family: 'Roboto', 'Noto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      
+      app-header {
+        background-color: var(--paper-blue-100);
+        --app-header-background-rear-layer: {
+          background-color: var(--paper-blue-500);
+        };
+      }
+      
+      .container{
+        padding: 10px;
+      }
+      
+      .flex{
+        @apply(--layout-flex);
+      }
+
+      .horizontal{
+        @apply(--layout-horizontal);
+      }
+      .wrap{
+        @apply(--layout-wrap);
+      }
+      .noun{
+        margin: 3px;
+        
+      }
+    </style>
+    
+    <iron-ajax id="ajax" 
+      url="https://localhost/api/retext" 
+      method="POST" 
+      content-type="text/plain"
+      body="[[text]]" 
+      last-response="{{_response}}"></iron-ajax>
+    
+    <app-header condenses reveals effects="resize-title">
+      <app-toolbar>
+          <h4 condensed-title>App name</h4>
+      </app-toolbar>
+      <app-toolbar>
+          <h1 title>App name</h1>
+      </app-toolbar>
+    </app-header>
+
+    <section class="container horizontal">
+      <paper-textarea class="flex" label="Type your text here" value="{{text}}"></paper-textarea>
+      <section class="container flex">
+        <div id="results"></div>
+      
+        <h4>Nouns</h4>
+        <div class="horizontal flex wrap">
+          <template is="dom-repeat" items="[[nouns]]">
+            <div class="noun">[[item]]</div>
+          </template>
+        </div>
+      </section>
+    </section>
+
+  </template>
+
+  
+  
+  <script>
+    Polymer({
+
+      is: 'text-app',
+
+      properties: {
+        text: {
+          type: String,
+          observer: '_handleText'
+        },
+        vocab: {
+          type: Object
+        },
+        nouns: {
+          type: Array
+        },
+        keywords: {
+          type: Array
+        },
+        keyphrases: {
+          type: Array
+        },
+        results:{
+          type: Array
+        },
+        _response: {
+          type: Object,
+          observer: '_parseResponse'
+        }        
+      },
+      
+      _get: function(map,key){
+        return map[key];
+      },
+      
+      _handleText: function(val){
+        if (!val.trim()) return;
+        var ajax = this.$.ajax;
+        this.debounce('retext', function(){ajax.generateRequest();}, 2000);
+      },
+      
+      _parseResponse: function(val){
+        var vocab = val.map_pos;
+        var text = val.text;
+        var keywords = val.keywords;
+        var keyphrases = val.keyphrases;
+        
+        this.vocab = val.map_pos;
+        this.keywords = val.keywords;
+        this.keyphrases = val.keyphrases;
+        
+        var nouns = {};
+        for (var k in vocab){
+          var token = vocab[k];
+          if (token.partOfSpeech.indexOf('NN')>=0) 
+            nouns[k.toLowerCase()]=true;
+        }
+        nouns = Object.keys(nouns);
+        var re_nouns = new RegExp('\\b('+nouns.join('|')+')\\b','gmi');
+        var re_keywords = new RegExp('\\b('+keyphrases.map(function(d){return d.key;}).join('|')+')\\b','gmi');
+        text = text.replace(re_nouns,'<i>$1</i>')
+          .replace(re_keywords,'<b>$1</b>')
+          .replace(/\n/g,'<br>');
+        this.$.results.innerHTML = text;
+        this.nouns = nouns.sort();
+        console.log(val);
+        
+      }
+    });
+  </script>
+</dom-module>
